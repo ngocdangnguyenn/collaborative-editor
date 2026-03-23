@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+    <VBox spacing="10" alignment="TOP_CENTER"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="ClientController">
+
+        <fx:define>
+            <ContextMenu fx:id="listViewContextMenu">
+                <items>
+                <MenuItem text="Add Line" onAction="#handleAddLine"/>
+                <MenuItem text="Delete Line" fx:id="deleteLineMenuItem" onAction="#handleDeleteLine" disable="true"/>
+                </items>
+            </ContextMenu>
+        </fx:define>
+
+        <ListView fx:id="listView" prefWidth="300" prefHeight="200"
+                  contextMenu="$listViewContextMenu">
+        </ListView>
+
+        <TextField fx:id="textField" promptText="Select a line and  edit here..." onAction="#handleTextFieldUpdate"/>
+        <Button fx:id="refreshButton" text="refresh" onAction="#handleRefresh"/>
+</VBox>
