@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'application'
+}
+
+java {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add('--enable-preview')
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = "23"
+    modules = ["javafx.controls", 'javafx.fxml', 'javafx.graphics']
+}
+
+dependencies {
+    // JavaFX
+    implementation 'org.openjfx:javafx-controls:23'
+    implementation 'org.openjfx:javafx-fxml:23'
+    implementation 'org.openjfx:javafx-graphics:23'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'GUIClient'
+    applicationDefaultJvmArgs = ['--enable-preview']
+}
