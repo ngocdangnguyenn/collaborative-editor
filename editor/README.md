@@ -22,18 +22,18 @@ Testé sur Ubuntu 22.04 / macOS avec le JDK Temurin 21.
 
 ```
 editor/
-├── build.gradle / settings.gradle / gradlew   ← build JavaFX (GUI uniquement)
+├── build.gradle / settings.gradle / gradlew
 ├── RAPPORT.md / README.md
 ├── scripts/
-│   ├── test-convergence.sh   ← convergence ServerCentralPush (tâche 2)
-│   ├── test-federation.sh    ← fédération simple 2 et 3 serveurs (tâche 4)
-│   ├── test-master.sh        ← fédération avec serveur maître (tâche 5)
-│   ├── test-dispatch.sh      ← validation + dispatch, 6 clients (tâche 6)
-│   ├── test-spof.sh          ← démonstration SPOF, ServerMasterFaulty (tâche 7A)
-│   ├── test-raft.sh          ← Raft : fonctionnement normal + panne d'un nœud (tâche 7B)
-│   ├── bench.sh              ← benchmark latence/débit, scénarios A et B
-│   ├── find-leader.sh        ← détection du leader Raft (utilisé par test-raft.sh)
-│   └── plot-bench.py         ← tracé des courbes benchmark (matplotlib)
+│   ├── test-convergence.sh
+│   ├── test-federation.sh
+│   ├── test-master.sh
+│   ├── test-dispatch.sh
+│   ├── test-spof.sh
+│   ├── test-raft.sh
+│   ├── bench.sh
+│   ├── find-leader.sh
+│   └── plot-bench.py
 └── src/main/
     ├── java/
     │   ├── ServerCentral.java
@@ -57,16 +57,12 @@ editor/
 
 ### Serveurs et clients automatiques
 
-Les scripts de test recompilent automatiquement. Pour compiler manuellement :
-
 ```bash
 cd editor/src/main/java
 javac *.java
 ```
 
 ### Client graphique (GUIClient)
-
-JavaFX ne se compile pas bien en `javac` direct à cause du classpath des modules. On utilise Gradle qui gère cela proprement :
 
 ```bash
 # Depuis editor/
@@ -77,26 +73,13 @@ JavaFX ne se compile pas bien en `javac` direct à cause du classpath des module
 
 ## Lancement manuel
 
-Depuis `editor/src/main/java/` après compilation :
+Depuis `editor/src/main/java/` :
 
 ```bash
-# Tâche 1 — Centralisé
 java ServerCentral 5000
-
-# Tâche 2 — Push
 java ServerCentralPush 5000
-
-# Tâche 3/4 — Fédération
-java ServerFederated 5000 &
-java ServerFederated 5001
-# Connexion B → A via TCP :
-python3 -c "import socket,time; s=socket.socket(); s.connect(('localhost',5001)); s.send(b'CONNECT localhost 5000\n'); time.sleep(2); s.close()"
-
-# Tâche 5 — Maître + esclaves
-java ServerMaster 5000 peers.cfg &   # maître
-java ServerMaster 5001 peers.cfg     # esclave
-
-# Tâche 6 — Dispatch
+java ServerFederated 5000
+java ServerMaster 5000 peers.cfg
 java ServerDispatch 4999 dispatch.cfg
 
 # Tâche 7B — Raft (3 nœuds)
@@ -116,17 +99,17 @@ peer   = localhost 5002
 
 ## Scripts de test automatisés
 
-Depuis `editor/scripts/`. Chaque script compile les classes requises, lance les serveurs en arrière-plan, exécute les clients avec barrière de synchronisation, compare les documents finaux, puis arrête les processus. En sortie normale : `[CONVERGENCE OK]`.
+Depuis `editor/scripts/`. Chaque script compile, lance les serveurs, exécute les tests avec barrière de synchronisation, puis affiche le résultat de convergence.
 
 ```bash
-chmod +x scripts/*.sh   # une seule fois, pour rendre les scripts exécutables
+chmod +x scripts/*.sh
 
-./scripts/test-convergence.sh   # tâche 2 : convergence ServerCentralPush
-./scripts/test-federation.sh    # tâche 4 : fédération simple 2 et 3 serveurs
-./scripts/test-master.sh        # tâche 5 : fédération maître-esclaves
-./scripts/test-dispatch.sh      # tâche 6 : 6 clients via dispatch
-./scripts/test-spof.sh          # tâche 7A : démonstration SPOF (maître gelé puis crashé)
-./scripts/test-raft.sh          # tâche 7B : Raft, Test A normal + Test B panne d'un nœud
+./scripts/test-convergence.sh   # Tâche 2 : ServerCentralPush
+./scripts/test-federation.sh    # Tâche 4 : fédération 2 et 3 serveurs
+./scripts/test-master.sh        # Tâche 5 : maître-esclaves
+./scripts/test-dispatch.sh      # Tâche 6 : 6 clients via dispatch
+./scripts/test-spof.sh          # Tâche 7A : démonstration SPOF
+./scripts/test-raft.sh          # Tâche 7B : Raft
 ```
 
 Pour les tâches 1 et 2, utiliser `test-convergence.sh` ou lancer le client graphique avec `./gradlew run`.

@@ -25,19 +25,15 @@ echo "===================================================="
 echo " TÂCHE 4 : Fédération simple"
 echo "===================================================="
 echo ""
-echo "[1/2] Compilation..."
+echo "Compilation..."
 javac ServerFederated.java AutoClient.java
-echo "OK"
 
 pkill -f "java ServerFederated" 2>/dev/null || true
 sleep 2
 
 # ── TEST A : 2 serveurs ──────────────────────────────────────────────────────
 echo ""
-echo "===================================================="
-echo " TEST A : 2 serveurs fédérés"
-echo "   Server A (port $PORT_A)  ←  Server B (port $PORT_B)"
-echo "===================================================="
+echo "Test A: 2-server federation (B → A)"
 rm -rf res_2srv barrier2
 mkdir -p res_2srv barrier2
 
@@ -72,9 +68,9 @@ echo ""; echo "--- result_1.txt (Server A) ---"; cat res_2srv/result_1.txt
 echo ""; echo "--- result_2.txt (Server B) ---"; cat res_2srv/result_2.txt
 echo ""
 if diff -q res_2srv/result_1.txt res_2srv/result_2.txt > /dev/null 2>&1; then
-    echo "[RÉSULTAT TEST A] CONVERGENCE OK — documents identiques"
+    echo "[PASS] Test A: documents converged"
 else
-    echo "[RÉSULTAT TEST A] DIVERGENCE détectée"
+    echo "[FAIL] Test A: document divergence"
 fi
 
 # ── TEST B : 3 serveurs en étoile ────────────────────────────────────────────

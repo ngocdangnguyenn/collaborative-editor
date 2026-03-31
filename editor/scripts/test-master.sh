@@ -13,9 +13,8 @@ echo "===================================================="
 echo " TÂCHE 5 : Fédération avec serveur maître"
 echo "===================================================="
 echo ""
-echo "[1/2] Compilation..."
+echo "Compilation..."
 javac ServerMaster.java AutoClient.java
-echo "OK"
 
 pkill -f "java ServerMaster" 2>/dev/null || true
 sleep 2
@@ -60,9 +59,9 @@ echo ""; echo "--- result_1.txt (Maître) ---";  cat res_t5_2srv/result_1.txt
 echo ""; echo "--- result_2.txt (Esclave) ---"; cat res_t5_2srv/result_2.txt
 echo ""
 if diff -q res_t5_2srv/result_1.txt res_t5_2srv/result_2.txt > /dev/null 2>&1; then
-    echo "[RÉSULTAT TEST A] CONVERGENCE OK"
+    echo "[PASS] Test A: master-slave convergence"
 else
-    echo "[RÉSULTAT TEST A] DIVERGENCE détectée"
+    echo "[FAIL] Test A: documents diverged"
 fi
 
 # ── TEST B : 1 maître + 2 esclaves ───────────────────────────────────────────
