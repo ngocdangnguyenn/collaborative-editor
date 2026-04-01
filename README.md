@@ -21,9 +21,9 @@ Testé sur Ubuntu 22.04 / macOS avec le JDK Temurin 21.
 ## Structure du projet
 
 ```
+RAPPORT.md / README.md
 editor/
 ├── build.gradle / settings.gradle / gradlew
-├── RAPPORT.md / README.md
 ├── scripts/
 │   ├── test-convergence.sh
 │   ├── test-federation.sh
@@ -99,7 +99,7 @@ peer   = localhost 5002
 
 ## Scripts de test automatisés
 
-Depuis `editor/scripts/`. Chaque script compile, lance les serveurs, exécute les tests avec barrière de synchronisation, puis affiche le résultat de convergence.
+Depuis `editor/`. Chaque script compile, lance les serveurs, exécute les tests avec barrière de synchronisation, puis affiche le résultat de convergence.
 
 ```bash
 chmod +x scripts/*.sh

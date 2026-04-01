@@ -10,8 +10,8 @@ OUT = os.path.dirname(os.path.abspath(__file__))
 
 # ── Scenario A: variable clients, 3 fixed servers ──────────────────────────
 clients      = [1, 2, 4, 8]
-latency_A    = [5.2, 6.9, 5.5, 5.1]
-throughput_A = [105, 198, 318, 471]
+latency_A    = [3.4, 4.0, 3.7, 4.0]
+throughput_A = [167, 196, 686, 1025]
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 fig.suptitle("Scénario A — 3 serveurs fixes, clients variables", fontsize=13)
@@ -40,8 +40,8 @@ print(f"Saved {path_A}")
 
 # ── Scenario B: variable servers, 4 fixed clients ──────────────────────────
 servers      = [2, 3, 5, 10]
-latency_B    = [5.1, 5.4, 7.1, 11.4]
-throughput_B = [403, 349, 298, 244]
+latency_B    = [3.5, 3.3, 4.3, 7.2]
+throughput_B = [442, 686, 633, 408]
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 fig.suptitle("Scénario B — 4 clients fixes, serveurs variables", fontsize=13)
