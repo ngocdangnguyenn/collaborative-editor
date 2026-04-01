@@ -1,0 +1,274 @@
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme{Madrid}
+  \usecolortheme{rose}
+  \usefonttheme{structurebold}
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+}
+
+\usepackage[french]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+\title[Editeur Collaboratif]{UE Applications Réseaux \\Editeur Collaboratif}
+\author{NICAISE Enzo \\NGUYEN Ngoc Dang Nguyen}
+\institute{Aix-Marseille Université}
+\date{10 avril 2026}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+\tableofcontents
+\end{frame}
+
+%------------------------------------------------
+\section{Introduction}
+
+\begin{frame}{Introduction}
+\begin{itemize}
+  \item Projet : implémentation d'un éditeur de texte collaboratif en Java
+  \item Objectif : expérimenter plusieurs architectures (centralisé, fédéré, maître-esclave, Raft)
+  \item Livrables : code Java, scripts de test, scripts de benchmark, rapport et slides
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Architecture générale}
+
+\begin{frame}{Architecture générale}
+\begin{itemize}
+  \item Composants principaux : serveurs (plusieurs variantes), clients automatiques, client graphique
+  \item Déploiement local pour tests : plusieurs processus Java sur localhost
+  \item Scripts d'automatisation dans `editor/scripts/` (compilation, déploiement, tests)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Rôles des composants}
+
+\begin{frame}{Rôles des composants}
+\begin{itemize}
+  \item `ServerCentral` : modèle pull simple (GETD)
+  \item `ServerCentralPush` : notifications push vers clients connectés
+  \item `ServerFederated` : propagation entre pairs avec message `PEERSYNC` / `SYNC`
+  \item `ServerMaster` : ordre centralisé des opérations via `FWDL` / `ORDER`
+  \item `ServerDispatch` : répartiteur (GETSERVER) pour masquer adresses réelles
+  \item `ServerRaft` : implémentation Raft pour tolérance aux pannes (3 nœuds)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Fonctionnalités implémentées}
+
+\begin{frame}{Fonctionnalités implémentées}
+\begin{itemize}
+  \item Édition ligne par ligne : `ADDL`, `MDFL`, `RMVL` avec versions par ligne
+  \item Mode pull et mode push pour clients (rafraîchissement et notifications)
+  \item Propagation entre serveurs : pair-à-pair (`PEERSYNC` / `SYNC`)
+  \item Maître logique pour ordre global : `FWDL` / `ORDER` avec `reqId` pour corrélation
+  \item Raft : élections, réplication et commit avec logs (AppendEntries)
+  \item Scripts d'automatisation : tests de convergence et benchmarks (barrière file-based)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Choix de conception}
+
+\begin{frame}{Choix de conception importants}
+\begin{itemize}
+  \item Protocole texte sur TCP : simple et débogable (netcat pour tests manuels)
+  \item `Thread-per-connection` : clarté et rapidité de développement
+  \item Versions par ligne pour détection d'écriture concurrente (ERRL)
+  \item Séparation des responsabilités : dispatch, master, fédéré, raft
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Données et tests}
+
+\begin{frame}{Méthodologie de test}
+\begin{itemize}
+  \item Tests fonctionnels : `AutoClient` (8 clients, 20 ops chacun) + barrières
+  \item Benchmarks : `BenchClient` pour latence / débit (20 ops/client mesurés)
+  \item Répétitions et observation de la variance : 20 ops stable, 100 ops plus bruité
+  \item Limitation : tests exécutés localement sur une seule machine (valeurs indicatives)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Résultats clés}
+
+\begin{frame}{Résultats clés (résumé)}
+\begin{itemize}
+  \item Scénario A (3 serveurs) : latence ~3.4–4.0 ms ; débit augmente jusqu'à ~1025 ops/s
+  \item Scénario B (serveurs variables) : latence croissante quand maître devient goulot
+  \item Raft : tolérance aux pannes confirmée avec quorum 2/3 (continuité après panne)
+  \item Remarque : débit absolu bruité en local, mais tendances cohérentes
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Difficultés et corrections}
+
+\begin{frame}{Difficultés rencontrées}
+\begin{itemize}
+  \item Boucles de réplication initiales entre pairs → solution `PEERSYNC`/`SYNC`
+  \item Format `AppendEntries` mal parsé → ajout d'un séparateur explicite
+  \item Mesures bruitées en local (ERRL, barrières, GC) → répétitions et choix 20 ops pour rapport
+  \item Gestion des pannes maître → implémentation Raft + démonstration `ServerMasterFaulty`
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Guide de démonstration}
+
+\begin{frame}[fragile]{Script de démonstration rapide}
+\begin{verbatim}
+# depuis editor/src/main/java
+javac *.java
+
+# lancer un maître + 2 esclaves
+java ServerMaster 5000 peers.cfg &
+java ServerMaster 5001 peers.cfg &
+java ServerMaster 5002 peers.cfg &
+
+# lancer BenchClients via script (ex : editor/scripts/bench.sh)
+./editor/scripts/bench.sh
+\end{verbatim}
+\end{frame}
+
+%------------------------------------------------
+\section{Packaging pour rendu}
+
+\begin{frame}{Packaging pour rendu}
+\begin{itemize}
+  \item Archive zip demandée : inclure tout `editor/`, `RAPPORT.md`, `RAPPORT.pdf`, `README.md`
+  \item Un seul rendu par équipe — vérifier `README.md` avec les noms et instructions
+  \item Commande rapide pour créer l'archive (depuis project root):
+  \begin{verbatim}
+  zip -r rendu_editeur.zip editor/ RAPPORT.md RAPPORT.pdf README.md
+  \end{verbatim}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Perspectives}
+
+\begin{frame}{Perspectives et améliorations}
+\begin{itemize}
+  \item Déployer sur machines distinctes pour mesures réalistes
+  \item Remplacer `synchronized` par mécanismes plus fins ou CRDT/OT pour résolution de conflits
+  \item Améliorer le protocole (compression, batching) et instrumentation des métriques
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+  \item Projet complet et fonctionnel — plusieurs architectures implémentées et testées
+  \item Résultats expérimentaux et scripts fournis pour reproduire les tests
+  \item Documents prêts : `RAPPORT.md` / `RAPPORT.pdf` et archive zip possible
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+%------------------------------------------------
+\section{Protocole (synthèse)}
+
+\begin{frame}{Protocole (synthèse)}
+\begin{itemize}
+  \item Protocole texte sur TCP : commandes une par ligne (facile à lire et debuguer)
+  \item Commandes client → serveur : `GETD`, `GETL`, `ADDL`, `MDFL`, `RMVL`
+  \item Notifications serveur → client : `LINE`, `ADDL`, `RMVL`, `DONE`, `ERRL`
+  \item Messages inter-serveurs : `PEERSYNC`, `SYNC ...` ; maître : `FWDL reqId cmd` / `ORDER seq reqId cmd`
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Implémentation et choix techniques}
+
+\begin{frame}{Implémentation et choix techniques}
+\begin{itemize}
+  \item Langage : Java 21 ; client GUI via JavaFX (Gradle)
+  \item Modèle de concurrence : thread par connexion (simplifie le code et le debug)
+  \item Synchronisation document : `synchronized` pour versions simples ; Raft pour consensus distribué
+  \item Tests automatisés : `AutoClient` (barrière file-based) et `BenchClient` pour mesures
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Validation và montée en charge}
+
+\begin{frame}{Benchmarks — Scénario A}
+\begin{itemize}
+  \item Scénario A : 3 serveurs (1 maître + 2 esclaves), nombre de clients variable
+  \item Mesures (20 ops/client) : latence moyenne stable ~3.5–4 ms ; débit augmente avec clients
+\end{itemize}
+\begin{center}
+  \includegraphics[width=0.85\textwidth]{bench_scenario_A.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Benchmarks — Scénario B}
+\begin{itemize}
+  \item Scénario B : 4 clients fixes, nombre de serveurs variable
+  \item Observations : latence augmente quand le nombre de serveurs devient grand (charge sur le maître)
+\end{itemize}
+\begin{center}
+  \includegraphics[width=0.85\textwidth]{bench_scenario_B.png}
+\end{center}
+\end{frame}
+
+%------------------------------------------------
+\section{Tolérance aux pannes}
+
+\begin{frame}{Tolérance aux pannes}
+\begin{itemize}
+  \item `ServerMasterFaulty` montre comportement avec SPOF (gel + arrêt du maître)
+  \item `ServerRaft` : implémentation Raft à 3 nœuds — timeouts 1500–3000 ms, heartbeat 300 ms
+  \item Résultat : avec quorum 2/3, le cluster continue après panne d'un nœud
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Comment exécuter}
+
+\begin{frame}[fragile]{Compilation et exécution}
+\begin{itemize}
+  \item Compiler les serveurs et clients (depuis `editor/src/main/java`):
+  \begin{verbatim}
+  cd editor/src/main/java
+  javac *.java
+  \end{verbatim}
+  \item Lancer le client graphique (depuis `editor/`):
+  \begin{verbatim}
+  ./gradlew run
+  \end{verbatim}
+  \item Scripts d'autotest et benchmark dans `editor/scripts/` (ex.: `./scripts/bench.sh`)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+  \item Projet couvert : architectures centralisée, push, fédérée, maître-esclave, Raft
+  \item Mesures : benchs locaux donnent tendances fiables, valeurs absolues indicatives
+  \item Travail possible : distribuer sur machines séparées, améliorer gestion des conflits (OT/CRDT)
+\end{itemize}
+\end{frame}
+
+\end{document}
