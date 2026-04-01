@@ -7,6 +7,34 @@
 
 ---
 
+## Organisation du code
+
+Tout le code serveur et les clients automatiques sont dans `editor/src/main/java/`, compilés directement avec `javac`. Les fichiers suivent la progression du projet :
+
+| Fichier | Rôle |
+|---|---|
+| `ServerCentral.java` | Serveur centralisé, mode pull |
+| `ServerCentralPush.java` | Serveur centralisé, notifications push |
+| `ServerFederated.java` | Serveur fédéré pair-à-pair |
+| `ServerMaster.java` | Fédération avec maître-esclaves |
+| `ServerMasterFaulty.java` | Maître instable (démonstration SPOF) |
+| `ServerDispatch.java` | Répartiteur de charge (round-robin) |
+| `ServerRaft.java` | Cluster tolérant aux pannes (Raft, 3 nœuds) |
+| `AutoClient.java` | Client automatique pour les tests de convergence |
+| `BenchClient.java` | Client de benchmark (latence et débit) |
+| `GUIClient.java` | Client graphique JavaFX |
+| `ClientController.java` | Client graphique JavaFX |
+
+**Protocole.** Toutes les communications client-serveur et serveur-serveur utilisent un protocole texte sur TCP (une commande par ligne). Les commandes principales sont `GETD`, `ADDL`, `MDFL`, `RMVL` côté client, et `LINE`, `DONE`, `ERRL` côté serveur. Ce choix simplifie le débogage (netcat suffit pour tester un serveur à la main) et l'écriture des clients automatiques.
+
+**Modèle de threads.** Chaque connexion entrante est gérée par un thread dédié (`Thread per client`). Pour les serveurs fédérés et Raft, les connexions inter-nœuds suivent le même modèle. La synchronisation sur le document partagé est assurée par `synchronized` sur l'objet serveur (tâches 1–6) ou par le thread `applyLoop` unique dans Raft.
+
+Le client graphique est géré séparément via Gradle (`editor/build.gradle`) car JavaFX nécessite des dépendances Maven. L'interface est définie dans `editor/src/main/resources/clientView.fxml`.
+
+Les scripts de validation et de benchmark sont dans `editor/scripts/`. Chaque script est autonome : il compile, démarre les serveurs sur des ports locaux, exécute les clients avec barrière de synchronisation, vérifie la convergence, puis affiche le résultat.
+
+---
+
 ## Tâche 1 — Serveur centralisé
 
 La première question à régler était le choix de la structure de données et la gestion des accès concurrents entre clients. Le document partagé est représenté par une `List<String>`, une entrée par ligne. On y associe une `List<Integer>` de numéros de version ligne par ligne, ce qui permet de détecter les modifications concurrentes côté client. Les deux listes sont protégées par un bloc `synchronized` sur l'instance serveur pour éviter les accès simultanés.
@@ -37,9 +65,9 @@ Avec un client par serveur et une barrière à 3, les documents convergent dans 
 
 ## Tâche 5 — Fédération avec serveur maître
 
-L'idée est simple : un seul nœud décide de l'ordre de toutes les modifications, les autres exécutent. La configuration se fait dans `peers.cfg` avec une ligne `master = host port` et des lignes `peer = host port` pour les esclaves.
+L'idée est simple : un seul nœud décide de l'ordre de toutes les modifications, les autres exécutent. La configuration se fait dans `peers.cfg`, qui ne contient qu'une seule ligne significative : `master = host port`. Chaque serveur lit ce fichier au démarrage et détermine lui-même son rôle : si son propre port d'écoute correspond au port du maître, il joue le rôle de maître ; sinon, il initie automatiquement une connexion vers le maître et se comporte en esclave.
 
-Quand un client envoie une modification à un esclave, l'esclave la transfère au maître avec `FWDL reqId cmd` et attend. Le maître l'applique, lui assigne un numéro de séquence, et diffuse `ORDER seqno cmd` à tous les esclaves. Chaque esclave applique la modification dans cet ordre, notifie ses clients en push, et débloque le client en attente. Tous les serveurs voient donc exactement les mêmes modifications dans le même ordre.
+Quand un client envoie une modification à un esclave, l'esclave la transfère au maître avec `FWDL reqId cmd` et attend. Le maître l'applique, lui assigne un numéro de séquence, et diffuse `ORDER seqno reqId cmd` à tous les esclaves. Chaque esclave applique la modification dans cet ordre, notifie ses clients en push, et débloque le client en attente via le `reqId`. Tous les serveurs voient donc exactement les mêmes modifications dans le même ordre.
 
 Sur nos tests (1 maître + 2 esclaves, 3 clients simultanés), les trois documents finaux sont toujours identiques, même quand plusieurs clients modifient la même ligne.
 
