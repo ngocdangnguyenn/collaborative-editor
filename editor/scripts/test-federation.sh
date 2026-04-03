@@ -1,6 +1,4 @@
 #!/bin/bash
-# test-federation.sh — Tâche 4 : fédération simple (2 et 3 serveurs)
-# Test A : 2 serveurs (B → A), Test B : 3 serveurs en étoile (B → A ← C)
 cd "$(dirname "$0")/../src/main/java"
 
 HOST=localhost
@@ -9,7 +7,6 @@ PORT_B=5001
 PORT_C=5002
 OPS=6
 
-# Envoie la commande CONNECT host port à un ServerFederated via TCP
 connect_peer() {
     python3 - "$1" "$2" "$3" "$4" <<'PY'
 import socket, time, sys
@@ -31,7 +28,6 @@ javac ServerFederated.java AutoClient.java
 pkill -f "java ServerFederated" 2>/dev/null || true
 sleep 2
 
-# ── TEST A : 2 serveurs ──────────────────────────────────────────────────────
 echo ""
 echo "Test A: 2-server federation (B → A)"
 rm -rf res_2srv barrier2
@@ -73,7 +69,6 @@ else
     echo "[FAIL] Test A: document divergence"
 fi
 
-# ── TEST B : 3 serveurs en étoile ────────────────────────────────────────────
 echo ""
 echo "===================================================="
 echo " TEST B : 3 serveurs fédérés (topologie étoile)"

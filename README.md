@@ -4,7 +4,7 @@
 * NICAISE Enzo  
 * NGUYEN Ngoc Dang Nguyen
 
-Ce projet implémente un éditeur de texte collaboratif en Java, en partant d'un serveur centralisé simple (tâche 1) jusqu'à un cluster tolérant aux pannes basé sur Raft (tâche 7). L'unité d'édition est la ligne ; plusieurs clients peuvent lire et modifier un document partagé simultanément.
+Ce projet implémente un éditeur de texte collaboratif en Java, en partant d'un serveur centralisé simple (tâche 1) jusqu'à un cluster tolérant aux pannes basé sur l'algorithme Bully (tâche 7). L'unité d'édition est la ligne ; plusieurs clients peuvent lire et modifier un document partagé simultanément.
 
 ---
 
@@ -30,9 +30,8 @@ editor/
 │   ├── test-master.sh
 │   ├── test-dispatch.sh
 │   ├── test-spof.sh
-│   ├── test-raft.sh
+│   ├── test-bully.sh
 │   ├── bench.sh
-│   ├── find-leader.sh
 │   └── plot-bench.py
 └── src/main/
     ├── java/
@@ -42,7 +41,7 @@ editor/
     │   ├── ServerMaster.java
     │   ├── ServerMasterFaulty.java
     │   ├── ServerDispatch.java
-    │   ├── ServerRaft.java
+    │   ├── ServerBully.java
     │   ├── AutoClient.java
     │   ├── BenchClient.java
     │   ├── ClientController.java
@@ -82,17 +81,15 @@ java ServerFederated 5000
 java ServerMaster 5000 peers.cfg
 java ServerDispatch 4999 dispatch.cfg
 
-# Tâche 7B — Raft (3 nœuds)
-java ServerRaft 5000 raft_1.cfg &
-java ServerRaft 5001 raft_2.cfg &
-java ServerRaft 5002 raft_3.cfg
+# Bully (3 nœuds)
+java ServerBully 5000 bully_1.cfg &
+java ServerBully 5001 bully_2.cfg &
+java ServerBully 5002 bully_3.cfg
 ```
 
 Exemple de `peers.cfg` pour la tâche 5 :
 ```
 master = localhost 5000
-peer   = localhost 5001
-peer   = localhost 5002
 ```
 
 ---
@@ -108,8 +105,8 @@ chmod +x scripts/*.sh
 ./scripts/test-federation.sh    # Tâche 4 : fédération 2 et 3 serveurs
 ./scripts/test-master.sh        # Tâche 5 : maître-esclaves
 ./scripts/test-dispatch.sh      # Tâche 6 : 6 clients via dispatch
-./scripts/test-spof.sh          # Tâche 7A : démonstration SPOF
-./scripts/test-raft.sh          # Tâche 7B : Raft
+./scripts/test-spof.sh          # démonstration SPOF
+./scripts/test-bully.sh         # algorithme Bully
 ```
 
 Pour les tâches 1 et 2, utiliser `test-convergence.sh` ou lancer le client graphique avec `./gradlew run`.

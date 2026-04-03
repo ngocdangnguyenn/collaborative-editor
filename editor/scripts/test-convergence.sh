@@ -1,6 +1,4 @@
 #!/bin/bash
-# test-convergence.sh — Tâche 2 : convergence ServerCentralPush
-# 8 clients parallèles, 20 opérations chacun, vérification de convergence finale
 set -e
 cd "$(dirname "$0")/../src/main/java"
 
@@ -18,6 +16,10 @@ rm -rf "$RESULTS" "$BARRIER"
 mkdir -p "$RESULTS" "$BARRIER"
 
 echo "Démarrage serveur..."
+java ServerCentralPush "$PORT" &
+SERVER_PID=$!
+sleep 2
+
 for i in $(seq 1 "$N"); do
     java AutoClient "$HOST" "$PORT" "$i" "$OPS" "$RESULTS/result_$i.txt" "$N" "$BARRIER" &
 done

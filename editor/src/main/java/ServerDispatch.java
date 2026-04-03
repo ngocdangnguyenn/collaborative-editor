@@ -16,9 +16,6 @@ public class ServerDispatch {
 
     void start(int port, String cfgPath) throws IOException {
         loadConfig(cfgPath);
-        System.out.println("[Dispatch] port=" + port
-                + "  " + servers.size() + " serveur(s) connu(s)");
-
         try (ServerSocket ss = new ServerSocket(port)) {
             while (true) {
                 Socket s = ss.accept();
@@ -58,8 +55,6 @@ public class ServerDispatch {
                     String[] srv = servers.get(
                             Math.abs(roundRobin.getAndIncrement()) % servers.size());
                     out.println("SERVER " + srv[0] + " " + srv[1]);
-                    System.out.println("[Dispatch] → " + srv[0] + ":" + srv[1]
-                            + "  (depuis " + s.getRemoteSocketAddress() + ")");
                 }
             }
         } catch (IOException e) {

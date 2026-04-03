@@ -1,6 +1,4 @@
 #!/bin/bash
-# test-dispatch.sh — Tâche 6 : validation fonctionnelle avec dispatch
-# 3 serveurs (1 maître + 2 esclaves) + ServerDispatch, 6 clients parallèles via dispatch
 cd "$(dirname "$0")/../src/main/java"
 
 HOST=localhost

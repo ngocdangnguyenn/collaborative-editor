@@ -1,11 +1,8 @@
 #!/bin/bash
-# test-spof.sh — Tâche 7A : démonstration du SPOF (ServerMasterFaulty)
-# Le maître se gèle toutes les 15s pendant 5s, puis crash après 3 minutes.
-# Les clients se bloquent pendant les gels, puis définitivement après le crash.
 cd "$(dirname "$0")/../src/main/java"
 
-echo "===================================================="
-echo " TÂCHE 7A : Démonstration du point de défaillance unique"
+echo "====================================================" 
+echo " Démonstration du point de défaillance unique"
 echo " ServerMasterFaulty — maître se gèle puis s'arrête"
 echo "===================================================="
 echo ""
@@ -76,5 +73,5 @@ done
 
 echo ""
 echo "===================================================="
-echo " FIN TÂCHE 7A"
+echo " FIN TÂCHE 7"
 echo "===================================================="

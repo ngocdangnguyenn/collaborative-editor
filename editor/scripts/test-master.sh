@@ -1,6 +1,4 @@
 #!/bin/bash
-# test-master.sh — Tâche 5 : fédération avec serveur maître
-# Test A : 1 maître + 1 esclave,  Test B : 1 maître + 2 esclaves
 cd "$(dirname "$0")/../src/main/java"
 
 HOST=localhost
@@ -19,7 +17,6 @@ javac ServerMaster.java AutoClient.java
 pkill -f "java ServerMaster" 2>/dev/null || true
 sleep 2
 
-# ── TEST A : 1 maître + 1 esclave ────────────────────────────────────────────
 echo ""
 echo "===================================================="
 echo " TEST A : 1 maître + 1 esclave"
@@ -64,7 +61,6 @@ else
     echo "[FAIL] Test A: documents diverged"
 fi
 
-# ── TEST B : 1 maître + 2 esclaves ───────────────────────────────────────────
 echo ""
 echo "===================================================="
 echo " TEST B : 1 maître + 2 esclaves"

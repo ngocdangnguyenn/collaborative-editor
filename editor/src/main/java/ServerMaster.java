@@ -39,10 +39,6 @@ public class ServerMaster {
         parsePeersCfg(cfgPath);
         isMaster = (myPort == masterPort);
 
-        System.out.println("[ServerMaster] port=" + myPort
-                + "  rôle=" + (isMaster ? "MAÎTRE" : "ESCLAVE")
-                + "  maître=" + masterHost + ":" + masterPort);
-
         if (!isMaster) {
 
             new Thread(this::connectToMaster, "MasterConnect").start();
@@ -145,8 +141,6 @@ public class ServerMaster {
                 masterConn = new MasterConnection(s);
                 masterConn.send("REGSLAVE");
                 new Thread(masterConn, "MasterConn").start();
-                System.out.println("[Esclave] Connecté au maître "
-                        + masterHost + ":" + masterPort);
                 return;
             } catch (IOException e) {
                 try { Thread.sleep(1000); }

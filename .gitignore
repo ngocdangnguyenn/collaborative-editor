@@ -1,32 +1,14 @@
-# Compiled classes
 *.class
-
-# Test-generated result and barrier directories
 res_*/
 bar_*/
 barrier*/
 convergence_results/
 federation_results/
-
-# Log files
 *.log
-
-# Temporary files from test scripts
-leader*.txt
-leaderB*.txt
-leader_port.tmp
-tache*_out.txt
-test_bench_out.txt
-
-# Runtime-generated config files (created by scripts at test time)
 *.cfg
 bench_results.csv
 bench_curves.png
-
-# __MACOSX junk from Mac ZIP extraction
 __MACOSX/
-
-# Gradle build & cache
 build/
 bin/
 .gradle/
@@ -34,11 +16,7 @@ bin/
 *.tar
 *.zip
 build.log
-
-# Mac metadata
 .DS_Store
-
-# Python cache
 __pycache__/
 *.pyc
 .venv/

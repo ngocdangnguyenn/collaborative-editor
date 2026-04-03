@@ -1,13 +1,4 @@
 #!/bin/bash
-# bench.sh — Tâche 6 : mesure de latence et de débit
-#
-# Scénarios :
-#   A) Nombre de clients variable  (3 serveurs fixes, 1M+2S)
-#   B) Nombre de serveurs variable (4 clients fixes, 1M+nS)
-#
-# Sortie : bench_results.csv (+ bench_curves.png via plot-bench.py)
-#
-# Usage : ./bench.sh [--ops N] [--dispatch-port P] [--master-base P]
 cd "$(dirname "$0")/../src/main/java"
 
 OPS_PER_CLIENT=20
@@ -25,7 +16,6 @@ done
 
 CSV_FILE="bench_results.csv"
 
-# ── Utilitaires ────────────────────────────────────────────────────────────
 
 wait_port() {
     local port=$1
@@ -91,7 +81,6 @@ run_scenario() {
             "$OPS_PER_CLIENT" 0 "$res_dir/result_$c.txt" "$num_clients" "$bar_dir" &
     done
 
-    # Attente résultats (max 120s)
     local deadline=$((SECONDS + 120))
     while [ $SECONDS -lt $deadline ]; do
         local found=0
@@ -102,7 +91,6 @@ run_scenario() {
         sleep 2
     done
 
-    # Parsing STATS : format = STATS clientId numOps wallMs avgLatMs minMs maxMs throughput
     local sum_lat=0 sum_thr=0 count=0
     for c in $(seq 1 "$num_clients"); do
         local f="$res_dir/result_$c.txt"
@@ -129,7 +117,6 @@ run_scenario() {
     avg_lat=$(python3 -c "print(round($sum_lat / $count, 2))")
     sys_thr=$(python3  -c "print(round($sum_thr, 2))")
 
-    # Vérification convergence
     local converged=true
     for c in $(seq 2 "$num_clients"); do
         if [ -f "$res_dir/result_1.txt" ] && [ -f "$res_dir/result_$c.txt" ]; then
@@ -146,24 +133,20 @@ run_scenario() {
     stop_all_servers
 }
 
-# ── Compilation ────────────────────────────────────────────────────────────
 echo "=== Compilation ==="
 javac ServerMaster.java ServerDispatch.java BenchClient.java
 echo "OK"
 
 stop_all_servers
 
-# Initialiser le CSV
 echo "Scenario,NumServers,NumClients,OpsPerClient,AvgLatencyMs,SysThroughput,Converged" > "$CSV_FILE"
 
-# ── Scénario A : clients variables (3 serveurs fixes) ─────────────────────
 echo ""
 echo "=== Scénario A : clients variables (3 serveurs, 1 maître + 2 esclaves) ==="
 for nc in 1 2 4 8; do
     run_scenario A 3 "$nc"
 done
 
-# ── Scénario B : serveurs variables (4 clients fixes) ─────────────────────
 echo ""
 echo "=== Scénario B : serveurs variables (4 clients fixes) ==="
 for ns in 2 3 5 10; do
